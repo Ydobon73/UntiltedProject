@@ -1,21 +1,22 @@
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class connection {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         String myURL = "http://www.cbr.ru/DailyInfoWebServ/DailyInfo.asmx";
-        String request = "<soap12:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap12=\"http://www.w3.org/2003/05/soap-envelope\">\n" +
-                "  <soap12:Body>\n" +
-                "    <Coins_base xmlns=\"http://web.cbr.ru/\">\n" +
-                "      <fromDate>2017-09-25</fromDate>\n" +
-                "      <ToDate>2017-09-27</ToDate>\n" +
-                "    </Coins_base>\n" +
-                "  </soap12:Body>\n" +
-                "</soap12:Envelope>";
+        String request = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
+                "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n" +
+                "  <soap:Body>\n" +
+                "    <GetCursOnDate xmlns=\"http://web.cbr.ru/\">\n" +
+                "      <On_date>2017-09-27</On_date>\n" +
+                "    </GetCursOnDate>\n" +
+                "  </soap:Body>\n" +
+                "</soap:Envelope>";
 
         URL url = null;
 
@@ -38,9 +39,9 @@ public class connection {
         rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
         String line;
         String respond = "";
-            respond = rd.readLine();
-            while ((line = rd.readLine()) != null)
-                respond = line;
+        respond = rd.readLine();
+        while ((line = rd.readLine()) != null)
+            respond = line;
         System.out.println(respond);
 
     }
