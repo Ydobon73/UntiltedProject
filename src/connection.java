@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 public class connection {
@@ -21,28 +22,51 @@ public class connection {
         URL url = null;
 
 
-        url = new URL(myURL);
+        try {
+            url = new URL(myURL);
+        } catch (MalformedURLException e1){
+            e1.printStackTrace();
+        }
         HttpURLConnection connection = null;
-        connection = (HttpURLConnection) url.openConnection();
+        try {
+            connection = (HttpURLConnection) url.openConnection();
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
         connection.setRequestProperty("Content-Length", String.valueOf(request.length()));
         connection.setRequestProperty("Content-Type", "text/xml;charset=UTF-8");
         connection.setRequestProperty("Connection", "Keep-Alive");
         connection.setRequestProperty("SoapAction", "http://web.cbr.ru/GetCursOnDate");
         connection.setDoOutput(true);
         PrintWriter pw = null;
-
-        pw = new PrintWriter(connection.getOutputStream());
+        try {
+            pw = new PrintWriter(connection.getOutputStream());
+        } catch (IOException e2){
+            e2.printStackTrace();
+        }
         pw.write(request);
         pw.flush();
-        connection.connect();
+        try {
+            connection.connect();
+        } catch (IOException e1){
+            e1.printStackTrace();
+        }
         BufferedReader rd = null;
-        rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        try {
+            rd = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+        } catch (IOException e1){
+            e1.printStackTrace();
+        }
         String line;
         String respond = "";
-        respond = rd.readLine();
-        while ((line = rd.readLine()) != null)
-            respond = line;
+        try {
+            respond = rd.readLine();
+            while ((line = rd.readLine()) != null)
+                respond = line;
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
         System.out.println(respond);
-
     }
+
 }
