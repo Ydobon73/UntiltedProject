@@ -84,7 +84,6 @@ public class connection {
             System.out.println(nodeList.getLength());
 
            for (int i = 0; i < nodeList.getLength(); i++) {
-                // Выводим информацию по каждому из найденных элементов
                 Node node = nodeList.item(i);
                 System.out.println();
                 System.out.println("Текущий элемент: " + node.getNodeName());
