@@ -90,7 +90,9 @@ public class connection {
                 System.out.println("Текущий элемент: " + node.getNodeName());
                 if (Node.ELEMENT_NODE == node.getNodeType()) {
                     Element element = (Element) node;
-                    System.out.printf("Валюта: %s%n", element.getAttribute("Vname"));
+                    System.out.println("Валюта: " + element
+                            .getElementsByTagName("Vname").item(0)
+                            .getTextContent());
                     System.out.println("Номинал: " + element
                             .getElementsByTagName("Vnom").item(0)
                             .getTextContent());
