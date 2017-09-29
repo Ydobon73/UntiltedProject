@@ -1,13 +1,21 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
+import org.w3c.dom.Document;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import static java.lang.String.*;
+
 public class connection {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, SAXException, ParserConfigurationException {
 
         String myURL = "http://www.cbr.ru/DailyInfoWebServ/DailyInfo.asmx";
         String request = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
@@ -33,7 +41,7 @@ public class connection {
         } catch (IOException e1) {
             e1.printStackTrace();
         }
-        connection.setRequestProperty("Content-Length", String.valueOf(request.length()));
+        connection.setRequestProperty("Content-Length", valueOf(request.length()));
         connection.setRequestProperty("Content-Type", "text/xml;charset=UTF-8");
         connection.setRequestProperty("Connection", "Keep-Alive");
         connection.setRequestProperty("SoapAction", "http://web.cbr.ru/GetCursOnDate");
@@ -66,7 +74,37 @@ public class connection {
         } catch (IOException e1) {
             e1.printStackTrace();
         }
-        System.out.println(respond);
+        //System.out.println(respond);
+        //парсинг
+        try{
+            DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document document = (Document) documentBuilder.parse(new InputSource(new StringReader(respond)));
+            document.getDocumentElement().normalize();
+            NodeList nodeList = document.getElementsByTagName("ValuteCursOnDate");
+            System.out.println(nodeList.getLength());
+
+           for (int i = 0; i < nodeList.getLength(); i++) {
+                // Выводим информацию по каждому из найденных элементов
+                Node node = nodeList.item(i);
+                System.out.println();
+                System.out.println("Текущий элемент: " + node.getNodeName());
+                if (Node.ELEMENT_NODE == node.getNodeType()) {
+                    Element element = (Element) node;
+                    System.out.printf("Валюта: %s%n", element.getAttribute("Vname"));
+                    System.out.println("Номинал: " + element
+                            .getElementsByTagName("Vnom").item(0)
+                            .getTextContent());
+                    System.out.println("Курс: " + element
+                            .getElementsByTagName("Vcurs").item(0)
+                            .getTextContent());
+                    System.out.println("Сокращение: " + element
+                            .getElementsByTagName("VchCode").item(0)
+                            .getTextContent());
+                }
+            }
+        } catch (Exception e) {
+            System.out.print("Problem parsing the file: "+e.getMessage());
+        }
     }
 
 }
