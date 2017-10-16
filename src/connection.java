@@ -11,18 +11,24 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.sql.*;
 
 import static java.lang.String.*;
 
 public class connection {
-    public static void main(String[] args) throws IOException, SAXException, ParserConfigurationException {
+    public static void main(String[] args) throws IOException, SAXException, ParserConfigurationException, ClassNotFoundException, SQLException {
+
 
         String myURL = "http://www.cbr.ru/DailyInfoWebServ/DailyInfo.asmx";
+        String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
         String request = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
                 "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n" +
                 "  <soap:Body>\n" +
                 "    <GetCursOnDate xmlns=\"http://web.cbr.ru/\">\n" +
-                "      <On_date>2017-09-27</On_date>\n" +
+                "      <On_date>" + date + "</On_date>\n" +
                 "    </GetCursOnDate>\n" +
                 "  </soap:Body>\n" +
                 "</soap:Envelope>";
@@ -75,7 +81,21 @@ public class connection {
             e1.printStackTrace();
         }
         //System.out.println(respond);
-        //парсинг
+
+        Connection sqlconnection = null;
+        //URL к базе состоит из протокола:подпротокола://[хоста]:[порта_СУБД]/[БД] и других_сведений
+        String sqlurl = "jdbc:postgresql://127.0.0.1:5432/postgres";
+        //Имя пользователя БД
+        String name = "postgres";
+        //Пароль
+        String password = "admin";
+        Class.forName("org.postgresql.Driver");
+        sqlconnection = DriverManager.getConnection(sqlurl, name, password);
+        Statement statement = null;
+        statement = sqlconnection.createStatement();
+        /*ResultSet result1 = statement.executeQuery("SELECT id,fname FROM test ");
+        while (result1.next()) {
+            System.out.println("Номер в выборке #" + result1.getRow() + "\t Номер в базе #" + result1.getInt("id") + "\t" + result1.getString("fname"));*/
         try{
             DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             Document document = (Document) documentBuilder.parse(new InputSource(new StringReader(respond)));
@@ -85,11 +105,17 @@ public class connection {
 
            for (int i = 0; i < nodeList.getLength(); i++) {
                 Node node = nodeList.item(i);
-                System.out.println();
-                System.out.println("Текущий элемент: " + node.getNodeName());
+               /* System.out.println();
+                System.out.println("Текущий элемент: " + node.getNodeName());*/
                 if (Node.ELEMENT_NODE == node.getNodeType()) {
                     Element element = (Element) node;
-                    System.out.println("Валюта: " + element
+                    ResultSet result1 = statement.executeQuery("INSERT INTO public.\"ValuteCurse\" (date, Vname, Vnom, VCurse, Vcode, Vchcode)" +
+                            "    VALUES ('" + date + "', '" + element.getElementsByTagName("Vname").item(0).getTextContent() +"" +
+                            "','" + element.getElementsByTagName("Vname").item(0).getTextContent() +
+                            "','" + element.getElementsByTagName("Vnom").item(0).getTextContent()+
+                            "','" + element.getElementsByTagName("Vcode").item(0).getTextContent()+
+                            "','" + element.getElementsByTagName("VchCode").item(0).getTextContent()+";");
+                    /*System.out.println("Валюта: " + element
                             .getElementsByTagName("Vname").item(0)
                             .getTextContent());
                     System.out.println("Номинал: " + element
@@ -100,7 +126,7 @@ public class connection {
                             .getTextContent());
                     System.out.println("Сокращение: " + element
                             .getElementsByTagName("VchCode").item(0)
-                            .getTextContent());
+                            .getTextContent());*/
                 }
             }
         } catch (Exception e) {
