@@ -119,8 +119,6 @@ public class connection {
                     VCurs = Double.parseDouble(element.getElementsByTagName("Vcurs").item(0).getTextContent());
                     Vcode = Integer.parseInt(element.getElementsByTagName("Vcode").item(0).getTextContent());
                     Vchcode = element.getElementsByTagName("VchCode").item(0).getTextContent();
-                    //System.out.println(date + Vname + Vnom + VCurs + Vcode + Vchcode);
-
                     statement.executeUpdate("INSERT INTO ValuteCurse (date, Vname, Vnom, VCurse, Vcode, Vchcode)" +
                             "    VALUES ( '" + date + "', '" + Vname +"'," + Vnom + "," + VCurs + "," + Vcode + ",'" + Vchcode + "');");
                 }
