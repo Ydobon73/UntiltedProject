@@ -22,6 +22,12 @@ public class connection {
     public static void main(String[] args) throws IOException, SAXException, ParserConfigurationException, ClassNotFoundException, SQLException {
 
 
+        String Vname = "";
+        int Vnom = 0;
+        double VCurs = 0;
+        int Vcode =0;
+        String Vchcode = "";
+
         String myURL = "http://www.cbr.ru/DailyInfoWebServ/DailyInfo.asmx";
         String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
         String request = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
@@ -80,7 +86,11 @@ public class connection {
         } catch (IOException e1) {
             e1.printStackTrace();
         }
-        //System.out.println(respond);
+        while(respond.contains("    ")) {
+            String replace = respond.replace("    ", "");
+            respond=replace;
+
+        }
 
         Connection sqlconnection = null;
         //URL к базе состоит из протокола:подпротокола://[хоста]:[порта_СУБД]/[БД] и других_сведений
@@ -93,45 +103,34 @@ public class connection {
         sqlconnection = DriverManager.getConnection(sqlurl, name, password);
         Statement statement = null;
         statement = sqlconnection.createStatement();
-        /*ResultSet result1 = statement.executeQuery("SELECT id,fname FROM test ");
-        while (result1.next()) {
-            System.out.println("Номер в выборке #" + result1.getRow() + "\t Номер в базе #" + result1.getInt("id") + "\t" + result1.getString("fname"));*/
+
         try{
             DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             Document document = (Document) documentBuilder.parse(new InputSource(new StringReader(respond)));
             document.getDocumentElement().normalize();
             NodeList nodeList = document.getElementsByTagName("ValuteCursOnDate");
-            System.out.println(nodeList.getLength());
 
            for (int i = 0; i < nodeList.getLength(); i++) {
                 Node node = nodeList.item(i);
-               /* System.out.println();
-                System.out.println("Текущий элемент: " + node.getNodeName());*/
                 if (Node.ELEMENT_NODE == node.getNodeType()) {
                     Element element = (Element) node;
-                    ResultSet result1 = statement.executeQuery("INSERT INTO public.\"ValuteCurse\" (date, Vname, Vnom, VCurse, Vcode, Vchcode)" +
-                            "    VALUES ('" + date + "', '" + element.getElementsByTagName("Vname").item(0).getTextContent() +"" +
-                            "','" + element.getElementsByTagName("Vname").item(0).getTextContent() +
-                            "','" + element.getElementsByTagName("Vnom").item(0).getTextContent()+
-                            "','" + element.getElementsByTagName("Vcode").item(0).getTextContent()+
-                            "','" + element.getElementsByTagName("VchCode").item(0).getTextContent()+";");
-                    /*System.out.println("Валюта: " + element
-                            .getElementsByTagName("Vname").item(0)
-                            .getTextContent());
-                    System.out.println("Номинал: " + element
-                            .getElementsByTagName("Vnom").item(0)
-                            .getTextContent());
-                    System.out.println("Курс: " + element
-                            .getElementsByTagName("Vcurs").item(0)
-                            .getTextContent());
-                    System.out.println("Сокращение: " + element
-                            .getElementsByTagName("VchCode").item(0)
-                            .getTextContent());*/
+                    Vname = element.getElementsByTagName("Vname").item(0).getTextContent();
+                    Vnom = Integer.parseInt(element.getElementsByTagName("Vnom").item(0).getTextContent());
+                    VCurs = Double.parseDouble(element.getElementsByTagName("Vcurs").item(0).getTextContent());
+                    Vcode = Integer.parseInt(element.getElementsByTagName("Vcode").item(0).getTextContent());
+                    Vchcode = element.getElementsByTagName("VchCode").item(0).getTextContent();
+                    //System.out.println(date + Vname + Vnom + VCurs + Vcode + Vchcode);
+
+                    statement.executeUpdate("INSERT INTO ValuteCurse (date, Vname, Vnom, VCurse, Vcode, Vchcode)" +
+                            "    VALUES ( '" + date + "', '" + Vname +"'," + Vnom + "," + VCurs + "," + Vcode + ",'" + Vchcode + "');");
                 }
             }
         } catch (Exception e) {
             System.out.print("Problem parsing the file: "+e.getMessage());
         }
+        ResultSet result1 = statement.executeQuery("SELECT Vcode, Vcurse FROM ValuteCurse ");
+        while (result1.next()) {
+            System.out.println("Номер в выборке #" + result1.getRow() + "\t Номер в базе #" + result1.getInt("Vcode") + "\t" + result1.getString("Vcurse"));}
     }
 
 }
