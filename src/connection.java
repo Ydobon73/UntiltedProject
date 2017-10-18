@@ -17,6 +17,12 @@ import static java.lang.String.*;
 public class connection {
     public static void main(String[] args) throws IOException, SAXException, ParserConfigurationException {
 
+        String Vname = "";
+        int Vnom = 0;
+        double VCurs = 0;
+        int Vcode =0;
+        String Vchcode = "";
+
         String myURL = "http://www.cbr.ru/DailyInfoWebServ/DailyInfo.asmx";
         String request = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
                 "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n" +
@@ -74,17 +80,38 @@ public class connection {
         } catch (IOException e1) {
             e1.printStackTrace();
         }
+<<<<<<< HEAD
         //System.out.println(respond);
         //парсинг
+=======
+        while(respond.contains("    ")) {
+            String replace = respond.replace("    ", "");
+            respond=replace;
+
+        }
+
+        Connection sqlconnection = null;
+        //URL к базе состоит из протокола:подпротокола://[хоста]:[порта_СУБД]/[БД] и других_сведений
+        String sqlurl = "jdbc:postgresql://127.0.0.1:5432/postgres";
+        //Имя пользователя БД
+        String name = "postgres";
+        //Пароль
+        String password = "admin";
+        Class.forName("org.postgresql.Driver");
+        sqlconnection = DriverManager.getConnection(sqlurl, name, password);
+        Statement statement = null;
+        statement = sqlconnection.createStatement();
+
+>>>>>>> 2cd8861c9be1706e09134c7c1722eb508bbd1a5d
         try{
             DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             Document document = (Document) documentBuilder.parse(new InputSource(new StringReader(respond)));
             document.getDocumentElement().normalize();
             NodeList nodeList = document.getElementsByTagName("ValuteCursOnDate");
-            System.out.println(nodeList.getLength());
 
            for (int i = 0; i < nodeList.getLength(); i++) {
                 Node node = nodeList.item(i);
+<<<<<<< HEAD
                 System.out.println();
                 System.out.println("Текущий элемент: " + node.getNodeName());
                 if (Node.ELEMENT_NODE == node.getNodeType()) {
@@ -101,11 +128,25 @@ public class connection {
                     System.out.println("Сокращение: " + element
                             .getElementsByTagName("VchCode").item(0)
                             .getTextContent());
+=======
+                if (Node.ELEMENT_NODE == node.getNodeType()) {
+                    Element element = (Element) node;
+                    Vname = element.getElementsByTagName("Vname").item(0).getTextContent();
+                    Vnom = Integer.parseInt(element.getElementsByTagName("Vnom").item(0).getTextContent());
+                    VCurs = Double.parseDouble(element.getElementsByTagName("Vcurs").item(0).getTextContent());
+                    Vcode = Integer.parseInt(element.getElementsByTagName("Vcode").item(0).getTextContent());
+                    Vchcode = element.getElementsByTagName("VchCode").item(0).getTextContent();
+                    statement.executeUpdate("INSERT INTO ValuteCurse (date, Vname, Vnom, VCurse, Vcode, Vchcode)" +
+                            "    VALUES ( '" + date + "', '" + Vname +"'," + Vnom + "," + VCurs + "," + Vcode + ",'" + Vchcode + "');");
+>>>>>>> 2cd8861c9be1706e09134c7c1722eb508bbd1a5d
                 }
             }
         } catch (Exception e) {
             System.out.print("Problem parsing the file: "+e.getMessage());
         }
+        ResultSet result1 = statement.executeQuery("SELECT Vcode, Vcurse FROM ValuteCurse ");
+        while (result1.next()) {
+            System.out.println("Номер в выборке #" + result1.getRow() + "\t Номер в базе #" + result1.getInt("Vcode") + "\t" + result1.getString("Vcurse"));}
     }
 
 }
